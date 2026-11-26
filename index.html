@@ -16,12 +16,12 @@
         --bg-pill: #2a2b32;
         --green-ok: #10b981;
     }
- 
+
     * {
         box-sizing: border-box;
         -webkit-tap-highlight-color: transparent;
     }
- 
+
     body {
         margin: 0;
         padding: 0;
@@ -34,7 +34,7 @@
         display: flex;
         flex-direction: column;
     }
- 
+
     /* VISTA DE LOGIN */
     .login-container {
         display: flex;
@@ -59,7 +59,7 @@
     .input-box:focus {
         border-color: var(--blue-btn);
     }
- 
+
     /* HEADER Y CHIP DE USUARIO */
     .scan-header {
         display: flex;
@@ -83,7 +83,7 @@
         font-size: 12px;
         font-weight: 600;
     }
- 
+
     /* BARRITAS DE PROGRESO */
     .progress-container {
         display: flex;
@@ -103,7 +103,7 @@
         background-color: var(--green-ok);
         box-shadow: 0 0 10px rgba(16, 185, 129, 0.6);
     }
- 
+
     /* CAJA PRINCIPAL DE ESCANEO */
     .workspace {
         flex: 1;
@@ -139,7 +139,7 @@
         font-weight: 600;
         word-break: break-all;
     }
- 
+
     /* BOTONES Y ETIQUETAS */
     .btn-blue-large {
         background-color: var(--blue-btn);
@@ -161,7 +161,7 @@
         background-color: #0062cc;
     }
     .btn-green { background-color: var(--green-ok); }
- 
+
     .scanner-indicator {
         display: flex;
         align-items: center;
@@ -177,14 +177,14 @@
         margin-bottom: 20px;
         text-align: center;
     }
- 
+
     .intentos-text {
         text-align: center;
         color: var(--text-muted);
         font-size: 14px;
         font-weight: 700;
     }
- 
+
     /* ESTILOS DE INPUT OCULTO SEGURO */
     .scanner-input-hidden {
         position: absolute;
@@ -196,7 +196,7 @@
         clip: rect(0, 0, 0, 0);
         border: 0;
     }
- 
+
     /* ELEMENTOS DEL PASO 4 */
     .img-verify {
         width: 100%;
@@ -221,7 +221,7 @@
         font-weight: 800;
         cursor: pointer;
     }
- 
+
     /* POPUPS Y BLOQUEO */
     #msg-pop {
         position: absolute;
@@ -251,80 +251,80 @@
 </style>
 </head>
 <body>
- 
+
 <!-- VISTA 1: LOGIN -->
 <div id="ui-login" class="login-container">
-<h2 style="text-align:center; color:var(--green-ok); margin-bottom: 30px;">KTMEX POKA-YOKE</h2>
-<input type="text" id="nom-input" class="input-box" placeholder="ESCRIBIR O ESCANEAR NÓMINA" autocomplete="off" autofocus>
-<div id="pin-box" style="display:none;">
-<input type="password" id="pin-input" class="input-box" placeholder="PIN DE LÍDER" autocomplete="off">
+    <h2 style="text-align:center; color:var(--green-ok); margin-bottom: 30px;">KTMEX POKA-YOKE</h2>
+    <input type="text" id="nom-input" class="input-box" placeholder="ESCRIBIR O ESCANEAR NÓMINA" autocomplete="off" autofocus>
+    <div id="pin-box" style="display:none;">
+        <input type="password" id="pin-input" class="input-box" placeholder="PIN DE LÍDER" autocomplete="off">
+    </div>
+    <div id="login-msg" style="color:var(--red-step); font-size:12px; font-weight:700; text-align:center; min-height:20px; margin-bottom:10px;"></div>
+    <button id="btn-login" type="button" class="btn-blue-large">INGRESAR</button>
 </div>
-<div id="login-msg" style="color:var(--red-step); font-size:12px; font-weight:700; text-align:center; min-height:20px; margin-bottom:10px;"></div>
-<button id="btn-login" type="button" class="btn-blue-large">INGRESAR</button>
-</div>
- 
+
 <!-- VISTA 2: FLUJO DE ESCANEO -->
 <div id="ui-scan" style="display:none; flex-direction:column; height:100%;">
- 
+
     <!-- HEADER -->
-<div class="scan-header">
-<h1 id="header-step-title" class="step-title">PASO 1: JAMAITA</h1>
-<div id="user-display" class="user-pill">Operador</div>
-</div>
- 
+    <div class="scan-header">
+        <h1 id="header-step-title" class="step-title">PASO 1: JAMAITA</h1>
+        <div id="user-display" class="user-pill">Operador</div>
+    </div>
+
     <!-- BARRITAS -->
-<div class="progress-container">
-<div class="progress-bar active" id="bar-1"></div>
-<div class="progress-bar" id="bar-2"></div>
-<div class="progress-bar" id="bar-3"></div>
-<div class="progress-bar" id="bar-4"></div>
-</div>
- 
+    <div class="progress-container">
+        <div class="progress-bar active" id="bar-1"></div>
+        <div class="progress-bar" id="bar-2"></div>
+        <div class="progress-bar" id="bar-3"></div>
+        <div class="progress-bar" id="bar-4"></div>
+    </div>
+
     <div class="workspace">
- 
+
         <!-- RECEPTOR OCULTO ZEBRA -->
-<input type="text" id="zebra-wedge-input" inputmode="none" autocomplete="off" class="scanner-input-hidden">
- 
+        <input type="text" id="zebra-wedge-input" inputmode="none" autocomplete="off" class="scanner-input-hidden">
+
         <!-- ÁREA CENTRAL DE ESCANEO -->
-<div class="scan-box-dashed" id="scan-container">
-<div id="msg-pop">ERROR DE LECTURA</div>
- 
+        <div class="scan-box-dashed" id="scan-container">
+            <div id="msg-pop">ERROR DE LECTURA</div>
+
             <!-- Texto para pasos -->
-<h2 id="main-prompt" class="scan-prompt-text">ESPERANDO ESCANEO...</h2>
-<div id="sub-prompt" class="scan-sub-text"></div>
- 
+            <h2 id="main-prompt" class="scan-prompt-text">ESPERANDO ESCANEO...</h2>
+            <div id="sub-prompt" class="scan-sub-text"></div>
+
             <!-- Interfaz Tekin para paso 4 -->
-<div id="step4-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
-<img id="img-tekin" class="img-verify" alt="Referencia Tekin">
-<div id="options-area" class="tekin-options"></div>
-</div>
-</div>
- 
+            <div id="step4-container" style="display:none; width:100%; flex-direction:column; align-items:center;">
+                <img id="img-tekin" class="img-verify" alt="Referencia Tekin">
+                <div id="options-area" class="tekin-options"></div>
+            </div>
+        </div>
+
         <!-- CONTROLES INFERIORES -->
-<div id="btn-manual-trigger" class="scanner-indicator">
-<span>📡</span> ESPERANDO ESCÁNER FÍSICO
-</div>
- 
+        <div id="btn-manual-trigger" class="scanner-indicator">
+            <span>📡</span> ESPERANDO ESCÁNER FÍSICO
+        </div>
+
         <!-- Botones ocultos por avance automático -->
-<button id="btn-res" class="btn-blue-large btn-green" style="display:none;">CONTINUAR AL SIGUIENTE PASO</button>
-<button id="btn-finish" class="btn-blue-large btn-green" style="display:none;">FINALIZAR PIEZA</button>
- 
+        <button id="btn-res" class="btn-blue-large btn-green" style="display:none;">CONTINUAR AL SIGUIENTE PASO</button>
+        <button id="btn-finish" class="btn-blue-large btn-green" style="display:none;">FINALIZAR PIEZA</button>
+
         <div id="retry-counter" class="intentos-text">Intentos: 0/5</div>
+    </div>
 </div>
-</div>
- 
+
 <!-- BLOQUEO DE SEGURIDAD -->
 <div id="lock" class="lock-ui">
-<h2 style="color:var(--red-step); font-weight:900;">BLOQUEO DE SEGURIDAD</h2>
-<p id="lock-msg" style="color:white; font-weight:700; margin-bottom: 20px;">EXCESO DE INTENTOS</p>
-<input type="password" id="pin-tl" class="input-box" style="max-width:280px;" placeholder="PIN DE LÍDER">
-<button id="btn-unlock" type="button" class="btn-blue-large" style="background-color:var(--red-step); max-width:280px;">DESBLOQUEAR</button>
+    <h2 style="color:var(--red-step); font-weight:900;">BLOQUEO DE SEGURIDAD</h2>
+    <p id="lock-msg" style="color:white; font-weight:700; margin-bottom: 20px;">EXCESO DE INTENTOS</p>
+    <input type="password" id="pin-tl" class="input-box" style="max-width:280px;" placeholder="PIN DE LÍDER">
+    <button id="btn-unlock" type="button" class="btn-blue-large" style="background-color:var(--red-step); max-width:280px;">DESBLOQUEAR</button>
 </div>
- 
+
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-app.js";
     import { initializeFirestore, doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.11.0/firebase-firestore.js";
- 
+
     const firebaseConfig = {
         apiKey: "AIzaSyA6Il03GHS4L_eDY1Kv3fMyF2EwuYLQ5qY",
         authDomain: "logistica-ktmex.firebaseapp.com",
@@ -335,18 +335,18 @@
         appId: "1:166597623735:web:3eace2ff8efec0f081b232",
         measurementId: "G-4YYT138NFR"
     };
- 
+
     const app = initializeApp(firebaseConfig);
     const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
-    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1GkWY2r-kz_wfv_-LPEeFEdKe1qNILTV86pln2xg_rIM/gviz/tq?tqx=out:csv%22;
- 
+    const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1GkWY2r-kz_wfv_-LPEeFEdKe1qNILTV86pln2xg_rIM/gviz/tq?tqx=out:csv";
+
     // Clientes habilitados en esta app
     const ALLOWED_CLIENTS = new Set(["TABC", "TMMBC"]);
- 
+
     let sheetData = [], usersCache = {};
     let user = null, step = 1, jamaita = "", kanbanParte = "", idCliente = "", expectedIdCliente = "", clienteFinal = "";
     let activeSheetRow = null, pendingData = null, retryCount = 0, paused = false;
- 
+
     // 1. INICIALIZACIÓN
     async function initBackgroundResources() {
         try {
@@ -355,12 +355,12 @@
             const localUsers = localStorage.getItem('ktmex_users');
             if (localUsers) usersCache = JSON.parse(localUsers);
         } catch (e) {}
- 
+
         fetch(SHEET_CSV_URL).then(res => res.text()).then(data => { 
             sheetData = parseCSV(data);
             try { localStorage.setItem('ktmex_sheet', JSON.stringify(sheetData)); } catch (e) {}
         }).catch(function(e) {});
- 
+
         // Precarga de usuarios desde la misma colección "Usuarios" de Firebase
         try {
             const snapUsers = await getDocs(collection(db, "Usuarios"));
@@ -371,7 +371,7 @@
             try { localStorage.setItem('ktmex_users', JSON.stringify(usersCache)); } catch (e) {}
         } catch (e) {}
     }
- 
+
     function parseCSV(text) {
         const lines = text.split(/\r\n|\n/);
         return lines.map(line => {
@@ -387,27 +387,27 @@
             return result;
         });
     }
- 
+
     // 2. LOGIN (IDÉNTICO AL ORIGINAL CON CONEXIÓN A COLECCIÓN "Usuarios" DE FIREBASE)
     async function checkLogin() {
         const nomInput = document.getElementById('nom-input');
         const pinInput = document.getElementById('pin-input');
         const msgEl = document.getElementById('login-msg');
         const btnLogin = document.getElementById('btn-login');
- 
+
         const nom = nomInput.value.trim();
         const pin = pinInput.value.trim();
         msgEl.innerText = "";
- 
+
         if (!nom) {
             msgEl.innerText = "Ingrese o escanee un número de nómina.";
             nomInput.focus();
             return;
         }
- 
+
         btnLogin.disabled = true;
         btnLogin.innerText = "VALIDANDO...";
- 
+
         try {
             let u = null;
             const s = await getDoc(doc(db, "Usuarios", nom));
@@ -416,10 +416,10 @@
             } else if (usersCache[nom] || usersCache[nom.toUpperCase()]) {
                 u = usersCache[nom] || usersCache[nom.toUpperCase()];
             }
- 
+
             if (u) {
                 const nivelNorm = String(u.nivel || "").trim().toLowerCase();
- 
+
                 if (nivelNorm === "operador") {
                     startSession(u);
                 } else {
@@ -446,11 +446,11 @@
                 msgEl.innerText = "Error de red al validar usuario.";
             }
         }
- 
+
         btnLogin.disabled = false;
         btnLogin.innerText = "INGRESAR";
     }
- 
+
     function startSession(u) {
         user = u;
         document.getElementById('user-display').innerText = u.nombre || "Operador";
@@ -458,7 +458,7 @@
         document.getElementById('ui-scan').style.display = 'flex';
         updateUIForStep();
     }
- 
+
     // 3. UI Y FLUJO
     function updateUIForStep() {
         for(let i=1; i<=4; i++) {
@@ -466,12 +466,12 @@
             if(i <= step) bar.classList.add('active');
             else bar.classList.remove('active');
         }
- 
+
         const title = document.getElementById('header-step-title');
         const mainPrompt = document.getElementById('main-prompt');
         const subPrompt = document.getElementById('sub-prompt');
         const step4View = document.getElementById('step4-container');
- 
+
         step4View.style.display = 'none';
         mainPrompt.style.display = 'block';
         subPrompt.style.display = 'block';
@@ -479,7 +479,7 @@
         document.getElementById('btn-res').style.display = 'none';
         document.getElementById('btn-finish').style.display = 'none';
         paused = false;
- 
+
         if(step === 1) {
             title.innerText = "PASO 1: JAMAITA";
             mainPrompt.innerText = "ESPERANDO ESCANEO...";
@@ -503,17 +503,18 @@
             initStep4();
         }
     }
- 
+
     function focusHardwareScanner() { 
         const wedge = document.getElementById('zebra-wedge-input');
         if (wedge) wedge.focus(); 
     }
- 
+
     // ==========================================
     // GUARDIÁN DE FOCO AUTOMÁTICO (LOGIN + PASOS 1, 2 Y 3)
     // ==========================================
     setInterval(() => {
         const active = document.activeElement;
+        
         if (!user) {
             if (!active || (active.id !== 'nom-input' && active.id !== 'pin-input' && active.tagName !== 'BUTTON')) {
                 const pinBox = document.getElementById('pin-box');
@@ -531,28 +532,29 @@
             }
         }
     }, 500);
- 
+
     // ==========================================
     // LECTURA UNIVERSAL DATAWEDGE TC22 (LOGIN + ESCANEO)
     // ==========================================
     const nomInputEl = document.getElementById('nom-input');
     const pinInputEl = document.getElementById('pin-input');
- 
+
     nomInputEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
             e.preventDefault();
             checkLogin();
         }
     });
- 
+
     pinInputEl.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
             e.preventDefault();
             checkLogin();
         }
     });
- 
+
     const wedgeInput = document.getElementById('zebra-wedge-input');
+    
     function triggerBarcodeProcess(val) {
         val = val.trim();
         wedgeInput.value = "";
@@ -560,14 +562,14 @@
             processFound(val);
         }
     }
- 
+
     wedgeInput.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
             e.preventDefault();
             triggerBarcodeProcess(wedgeInput.value);
         }
     });
- 
+
     let inputTimeout;
     wedgeInput.addEventListener('input', () => {
         clearTimeout(inputTimeout);
@@ -578,12 +580,12 @@
             }
         }, 400); 
     });
- 
+
     // Captura Global para ráfagas de teclado
     let keyBuffer = "", keyTimer = null;
     window.addEventListener('keydown', (e) => {
         const activeId = document.activeElement ? document.activeElement.id : "";
- 
+
         if (!user) {
             if ((e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) && (activeId === 'nom-input' || activeId === 'pin-input')) {
                 e.preventDefault();
@@ -591,20 +593,20 @@
             }
             return;
         }
- 
+
         if (activeId === 'pin-tl') {
             if (e.key === 'Enter' || e.keyCode === 13) document.getElementById('btn-unlock').click();
             return;
         }
- 
+
         if (paused && (e.key === 'Enter' || e.keyCode === 13) && document.getElementById('btn-res').style.display === 'block') {
             e.preventDefault();
             document.getElementById('btn-res').click();
             return;
         }
- 
+
         if (paused || (step !== 1 && step !== 2 && step !== 3) || activeId === 'zebra-wedge-input') return;
- 
+
         if (e.key === 'Enter' || e.keyCode === 13) {
             if (keyBuffer.trim().length > 0) {
                 const scanned = keyBuffer.trim();
@@ -617,29 +619,29 @@
             keyTimer = setTimeout(() => { keyBuffer = ""; }, 800); 
         }
     });
- 
+
     document.addEventListener('click', (e) => {
         if (user && (step === 1 || step === 2 || step === 3) && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
             focusHardwareScanner();
         }
     });
- 
+
     document.addEventListener('touchstart', (e) => {
         if (user && (step === 1 || step === 2 || step === 3) && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
             focusHardwareScanner();
         }
     });
- 
+
     // Extracción de IDC desde la cadena completa del QR de cliente (TABC / TMMBC)
     function extractIDCFromClientQR(rawQr, expectedIDC) {
         const upperQr = rawQr.toUpperCase();
- 
+
         // 1. Búsqueda estándar tras "50500" + 2 caracteres de Dock Code (ej. 50500AFACFF...)
         const stdMatch = upperQr.match(/50500[A-Z0-9]{2}([A-Z0-9]{4})/);
         if (stdMatch && stdMatch[1]) {
             if (!expectedIDC || stdMatch[1] === expectedIDC) return stdMatch[1];
         }
- 
+
         // 2. Posición fija estándar (caracteres 39 a 42 -> índices 38 a 42)
         if (upperQr.length >= 42) {
             const fixedSlice = upperQr.substring(38, 42).trim();
@@ -647,30 +649,30 @@
                 if (!expectedIDC || fixedSlice === expectedIDC) return fixedSlice;
             }
         }
- 
+
         // 3. Búsqueda directa en toda la cadena del QR por coincidencia con el IDC esperado
         if (expectedIDC && upperQr.includes(expectedIDC)) {
             return expectedIDC;
         }
- 
+
         return stdMatch ? stdMatch[1] : "";
     }
- 
+
     // 4. LÓGICA CORE DE VALIDACIÓN
     async function processFound(val) {
         paused = true;
         const rawVal = val.trim();
- 
+
         // PASO 1: JAMAITA (SEBANGO + FILTRO CLIENTE TABC / TMMBC)
         if (step === 1) {
             const scannedSebango = rawVal.toUpperCase();
             const rowMatch = sheetData.find(row => row[7] && row[7].trim().toUpperCase() === scannedSebango);
- 
+
             if (!rowMatch) {
                 handleStepFailure("SEBANGO NO ENCONTRADO EN BD", "Sebango no registrado en base de datos.");
                 return;
             }
- 
+
             const rowCF = rowMatch[10] ? rowMatch[10].trim().toUpperCase() : "";
             if (!ALLOWED_CLIENTS.has(rowCF)) {
                 handleStepFailure(
@@ -679,13 +681,14 @@
                 );
                 return;
             }
- 
+
             jamaita = scannedSebango;
             clienteFinal = rowCF;
- 
+
             document.getElementById('main-prompt').innerText = `¡JAMAITA OK!`;
             document.getElementById('sub-prompt').innerText = `${jamaita} (${clienteFinal})`;
             document.getElementById('btn-manual-trigger').style.display = 'none';
+            
             logToDB("OK", `Paso 1: Jamaita OK (${jamaita} - ${clienteFinal})`);
             setTimeout(() => { step++; updateUIForStep(); }, 200);
         } 
@@ -693,7 +696,7 @@
         else if (step === 2) {
             const parts = rawVal.split('-');
             let parsedPart = rawVal;
- 
+
             if (parts.length >= 4) {
                 parsedPart = parts.slice(1, -1).join('-');
             } else if (parts.length === 3) {
@@ -702,23 +705,23 @@
                 parsedPart = rawVal.substring(rawVal.indexOf('-') + 1).trim();
             }
             parsedPart = parsedPart.replace(/-00$/i, '').trim().toUpperCase();
- 
+
             const matchedRow = sheetData.find(row => {
                 const cellH = row[7] ? row[7].trim().toUpperCase() : '';
                 const cellJ = row[9] ? row[9].trim().toUpperCase() : '';
                 const cellK = row[10] ? row[10].trim().toUpperCase() : '';
                 return cellH === jamaita && cellJ === parsedPart && cellK === clienteFinal;
             });
- 
+
             if (matchedRow) {
                 kanbanParte = parsedPart;
                 activeSheetRow = matchedRow;
                 expectedIdCliente = matchedRow[8] ? matchedRow[8].trim().toUpperCase() : '';
- 
+
                 document.getElementById('main-prompt').innerText = `¡KANBAN OK!`;
                 document.getElementById('sub-prompt').innerText = kanbanParte;
                 document.getElementById('btn-manual-trigger').style.display = 'none';
- 
+
                 logToDB("OK", `Paso 2: Kanban Parte OK (${kanbanParte})`);
                 setTimeout(() => { step++; updateUIForStep(); }, 200); 
             } else {
@@ -728,7 +731,7 @@
         // PASO 3: QR DE ETIQUETA CLIENTE (EXTRACCIÓN DE IDC Y CRUCE CON COLUMNA IDC Y CF)
         else if (step === 3) {
             const extractedIDC = extractIDCFromClientQR(rawVal, expectedIdCliente);
- 
+
             const validRow = sheetData.find(row => {
                 const cellH = row[7] ? row[7].trim().toUpperCase() : '';
                 const cellI = row[8] ? row[8].trim().toUpperCase() : '';
@@ -743,22 +746,22 @@
                     extractedIDC !== "-"
                 );
             });
- 
+
             if (validRow) {
                 idCliente = extractedIDC;
                 activeSheetRow = validRow;
- 
+
                 try {
                     const s = await getDoc(doc(db, "Maestro_Partes", idCliente));
                     pendingData = s.exists() ? s.data() : {};
                 } catch (e) {
                     pendingData = {};
                 }
- 
+
                 document.getElementById('main-prompt').innerText = `¡CLIENTE OK!`;
                 document.getElementById('sub-prompt').innerText = `IDC: ${idCliente} (${clienteFinal})`;
                 document.getElementById('btn-manual-trigger').style.display = 'none';
- 
+
                 logToDB("OK", `Paso 3: QR Cliente OK (${idCliente} - ${clienteFinal})`);
                 setTimeout(() => { step++; updateUIForStep(); }, 250);
             } else {
@@ -769,12 +772,12 @@
             }
         }
     }
- 
+
     document.getElementById('btn-res').addEventListener('click', () => {
         step++;
         updateUIForStep();
     });
- 
+
     function logToDB(status, msg = "") {
         addDoc(collection(db, "Bitacora_Incidencias"), {
             usuario: user ? user.nombre : "N/A",
@@ -786,7 +789,7 @@
             timestamp: serverTimestamp()
         }).catch(function(e) {});
     }
- 
+
     function resetCycle() {
         step = 1;
         retryCount = 0;
@@ -800,7 +803,7 @@
         document.getElementById('retry-counter').innerText = `Intentos: 0/5`;
         updateUIForStep();
     }
- 
+
     // 5. PASO 4 TEKIN (CON RESPALDO DE GOOGLE SHEET Y OMISIÓN SI ES NA / N/A)
     function getRandomOtherTekin(correctTekin) {
         const distinctTekins = new Set();
@@ -814,21 +817,21 @@
         if (pool.length === 0) return "OTRO";
         return pool[Math.floor(Math.random() * pool.length)];
     }
- 
+
     function initStep4() {
         const sheetTekin = activeSheetRow && activeSheetRow[2] ? activeSheetRow[2].trim().toUpperCase() : "";
         const sheetImg = activeSheetRow && activeSheetRow[11] ? activeSheetRow[11].trim() : "";
- 
+
         const hasFirestoreTekin = pendingData && pendingData.Tekin_OK && !["NA", "N/A", "-"].includes(String(pendingData.Tekin_OK).trim().toUpperCase());
         if (!hasFirestoreTekin && (!sheetTekin || sheetTekin === "NA" || sheetTekin === "N/A" || sheetTekin === "-")) {
             logToDB("OK", `Paso 4: Tekin omitido automáticamente (NA) - ${idCliente}`);
             resetCycle();
             return;
         }
- 
+
         document.getElementById('step4-container').style.display = 'flex';
         const img = document.getElementById('img-tekin');
- 
+
         const resolvedImg = (pendingData && pendingData.img_url) ? pendingData.img_url : sheetImg;
         if (resolvedImg && (resolvedImg.startsWith("http") || resolvedImg.startsWith("data:image"))) {
             img.src = resolvedImg;
@@ -836,17 +839,17 @@
         } else {
             img.style.display = 'none';
         }
- 
+
         const t_ok = hasFirestoreTekin ? String(pendingData.Tekin_OK).trim().toUpperCase() : sheetTekin;
         const t_ng = (pendingData && pendingData.Tekin_NG)
             ? String(pendingData.Tekin_NG).trim().toUpperCase()
             : getRandomOtherTekin(t_ok);
- 
+
         const opts = [t_ok, t_ng].sort(() => Math.random() - 0.5);
- 
+
         const area = document.getElementById('options-area');
         area.innerHTML = "";
- 
+
         opts.forEach(o => {
             const b = document.createElement('button');
             b.className = "option-btn";
@@ -865,16 +868,16 @@
             area.appendChild(b);
         });
     }
- 
+
     document.getElementById('btn-finish').addEventListener('click', () => {
         resetCycle();
     });
- 
+
     // 6. MANEJO DE INTENTOS Y BLOQUEO
     function handleStepFailure(lockReason, statusText) {
         retryCount++;
         document.getElementById('retry-counter').innerText = `Intentos: ${retryCount}/5`;
- 
+
         if (retryCount >= 5) {
             logToDB("NG", "EXCESO DE INTENTOS: " + lockReason);
             document.getElementById('lock-msg').innerText = lockReason;
@@ -890,11 +893,11 @@
             }, 1200); 
         }
     }
- 
+
     document.getElementById('btn-unlock').addEventListener('click', async () => {
         const p = document.getElementById('pin-tl').value.trim();
         if(!p) return;
- 
+
         try {
             const q = query(collection(db, "Usuarios"), where("nivel", "==", "Lider"), where("pin", "==", p));
             const s = await getDocs(q);
@@ -907,7 +910,7 @@
             }
         } catch(e) {}
     });
- 
+
     document.getElementById('btn-login').addEventListener('click', checkLogin);
     initBackgroundResources();
 </script>
