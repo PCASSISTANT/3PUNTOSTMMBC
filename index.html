@@ -60,7 +60,30 @@
         border-color: var(--blue-btn);
     }
  
-
+    /* HEADER Y CHIP DE USUARIO */
+    .scan-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px 20px 5px 20px;
+    }
+    .step-title {
+        color: var(--green-ok);
+        font-size: 20px;
+        font-weight: 900;
+        text-transform: uppercase;
+        margin: 0;
+        letter-spacing: 0.5px;
+    }
+    .user-pill {
+        background-color: var(--bg-pill);
+        color: var(--text-muted);
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+ 
     /* BARRITAS DE PROGRESO */
     .progress-container {
         display: flex;
@@ -266,7 +289,7 @@
 <div class="scan-box-dashed" id="scan-container">
 <div id="msg-pop">ERROR DE LECTURA</div>
  
-            <!-- Texto para pasos 1, 2 y 3 -->
+            <!-- Texto para pasos -->
 <h2 id="main-prompt" class="scan-prompt-text">ESPERANDO ESCANEO...</h2>
 <div id="sub-prompt" class="scan-sub-text"></div>
  
@@ -317,24 +340,36 @@
     const db = initializeFirestore(app, { experimentalAutoDetectLongPolling: true });
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/1GkWY2r-kz_wfv_-LPEeFEdKe1qNILTV86pln2xg_rIM/gviz/tq?tqx=out:csv%22;
  
-    // Clientes habilitados para esta aplicación
+    // Clientes habilitados en esta app
     const ALLOWED_CLIENTS = new Set(["TABC", "TMMBC"]);
  
-    let sheetData = [];
+    let sheetData = [], usersCache = {};
     let user = null, step = 1, jamaita = "", kanbanParte = "", idCliente = "", expectedIdCliente = "", clienteFinal = "";
     let activeSheetRow = null, pendingData = null, retryCount = 0, paused = false;
  
-    // 1. INICIALIZACIÓN DE RECURSOS
+    // 1. INICIALIZACIÓN
     async function initBackgroundResources() {
         try {
             const localSheet = localStorage.getItem('ktmex_sheet');
             if (localSheet) sheetData = JSON.parse(localSheet);
+            const localUsers = localStorage.getItem('ktmex_users');
+            if (localUsers) usersCache = JSON.parse(localUsers);
         } catch (e) {}
  
         fetch(SHEET_CSV_URL).then(res => res.text()).then(data => { 
             sheetData = parseCSV(data);
             try { localStorage.setItem('ktmex_sheet', JSON.stringify(sheetData)); } catch (e) {}
-        });
+        }).catch(function(e) {});
+ 
+        // Precarga de usuarios desde la misma colección "Usuarios" de Firebase
+        try {
+            const snapUsers = await getDocs(collection(db, "Usuarios"));
+            snapUsers.forEach(d => {
+                usersCache[d.id] = d.data();
+                usersCache[d.id.toUpperCase()] = d.data();
+            });
+            try { localStorage.setItem('ktmex_users', JSON.stringify(usersCache)); } catch (e) {}
+        } catch (e) {}
     }
  
     function parseCSV(text) {
@@ -353,7 +388,7 @@
         });
     }
  
-    // 2. LOGIN
+    // 2. LOGIN (IDÉNTICO AL ORIGINAL CON CONEXIÓN A COLECCIÓN "Usuarios" DE FIREBASE)
     async function checkLogin() {
         const nomInput = document.getElementById('nom-input');
         const pinInput = document.getElementById('pin-input');
@@ -374,9 +409,15 @@
         btnLogin.innerText = "VALIDANDO...";
  
         try {
+            let u = null;
             const s = await getDoc(doc(db, "Usuarios", nom));
             if (s.exists()) {
-                const u = s.data();
+                u = s.data();
+            } else if (usersCache[nom] || usersCache[nom.toUpperCase()]) {
+                u = usersCache[nom] || usersCache[nom.toUpperCase()];
+            }
+ 
+            if (u) {
                 const nivelNorm = String(u.nivel || "").trim().toLowerCase();
  
                 if (nivelNorm === "operador") {
@@ -397,7 +438,14 @@
             } else {
                 msgEl.innerText = `La nómina "${nom}" no existe en la base.`;
             }
-        } catch(e) { msgEl.innerText = "Error de red al validar usuario."; }
+        } catch(e) {
+            const cached = usersCache[nom] || usersCache[nom.toUpperCase()];
+            if (cached && String(cached.nivel || "").trim().toLowerCase() === "operador") {
+                startSession(cached);
+            } else {
+                msgEl.innerText = "Error de red al validar usuario.";
+            }
+        }
  
         btnLogin.disabled = false;
         btnLogin.innerText = "INGRESAR";
@@ -462,7 +510,7 @@
     }
  
     // ==========================================
-    // GUARDIÁN DE FOCO AUTOMÁTICO (PASOS 1, 2 Y 3)
+    // GUARDIÁN DE FOCO AUTOMÁTICO (LOGIN + PASOS 1, 2 Y 3)
     // ==========================================
     setInterval(() => {
         const active = document.activeElement;
@@ -485,8 +533,25 @@
     }, 500);
  
     // ==========================================
-    // LECTURA UNIVERSAL DATAWEDGE TC22
+    // LECTURA UNIVERSAL DATAWEDGE TC22 (LOGIN + ESCANEO)
     // ==========================================
+    const nomInputEl = document.getElementById('nom-input');
+    const pinInputEl = document.getElementById('pin-input');
+ 
+    nomInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
+            e.preventDefault();
+            checkLogin();
+        }
+    });
+ 
+    pinInputEl.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) {
+            e.preventDefault();
+            checkLogin();
+        }
+    });
+ 
     const wedgeInput = document.getElementById('zebra-wedge-input');
     function triggerBarcodeProcess(val) {
         val = val.trim();
@@ -520,7 +585,7 @@
         const activeId = document.activeElement ? document.activeElement.id : "";
  
         if (!user) {
-            if ((e.key === 'Enter' || e.keyCode === 13) && (activeId === 'nom-input' || activeId === 'pin-input')) {
+            if ((e.key === 'Enter' || e.keyCode === 13 || e.keyCode === 9) && (activeId === 'nom-input' || activeId === 'pin-input')) {
                 e.preventDefault();
                 checkLogin();
             }
@@ -636,7 +701,6 @@
             } else if (rawVal.includes('-')) {
                 parsedPart = rawVal.substring(rawVal.indexOf('-') + 1).trim();
             }
-            // Asegura eliminar terminación -00 residual si viniera sin prefijo
             parsedPart = parsedPart.replace(/-00$/i, '').trim().toUpperCase();
  
             const matchedRow = sheetData.find(row => {
@@ -687,7 +751,7 @@
                 try {
                     const s = await getDoc(doc(db, "Maestro_Partes", idCliente));
                     pendingData = s.exists() ? s.data() : {};
-                } catch {
+                } catch (e) {
                     pendingData = {};
                 }
  
@@ -720,7 +784,7 @@
             idc: idCliente || "N/A",
             error_msg: msg,
             timestamp: serverTimestamp()
-        }).catch(() => {});
+        }).catch(function(e) {});
     }
  
     function resetCycle() {
@@ -755,7 +819,6 @@
         const sheetTekin = activeSheetRow && activeSheetRow[2] ? activeSheetRow[2].trim().toUpperCase() : "";
         const sheetImg = activeSheetRow && activeSheetRow[11] ? activeSheetRow[11].trim() : "";
  
-        // Si en la hoja de cálculo TEKIN es NA o N/A (o vacío sin dato en Firestore), se omite automáticamente
         const hasFirestoreTekin = pendingData && pendingData.Tekin_OK && !["NA", "N/A", "-"].includes(String(pendingData.Tekin_OK).trim().toUpperCase());
         if (!hasFirestoreTekin && (!sheetTekin || sheetTekin === "NA" || sheetTekin === "N/A" || sheetTekin === "-")) {
             logToDB("OK", `Paso 4: Tekin omitido automáticamente (NA) - ${idCliente}`);
@@ -766,7 +829,6 @@
         document.getElementById('step4-container').style.display = 'flex';
         const img = document.getElementById('img-tekin');
  
-        // Prioriza imagen de Firestore; si no existe, usa la columna IMG del Google Sheet
         const resolvedImg = (pendingData && pendingData.img_url) ? pendingData.img_url : sheetImg;
         if (resolvedImg && (resolvedImg.startsWith("http") || resolvedImg.startsWith("data:image"))) {
             img.src = resolvedImg;
